@@ -41,8 +41,21 @@ download_release() {
 	version="$1"
 	filename="$2"
 
-	# TODO: Adapt the release URL convention for mcfly
-	url="$GH_REPO/archive/v${version}.tar.gz"
+	local platform
+	case "$OSTYPE" in
+		darwin*) platform="macos" ;;
+		linux*) platform="unknown-linux-musl" ;;
+		*) fail "Unsupported platform" ;;
+	esac
+
+	local architecture
+	case "$(uname -m)" in
+		x86_64) architecture="x86_64" ;;
+		arm64) architecture="armv7" ;;
+		*) fail "Unsupported architecture" ;;
+	esac
+
+	url="$GH_REPO/releases/download/v${version}/mcfly-v${version}-${architecture}-${platform}.tar.gz"
 
 	echo "* Downloading $TOOL_NAME release $version..."
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
